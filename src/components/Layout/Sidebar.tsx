@@ -1,5 +1,6 @@
 import React from 'react';
-import { Activity, Users, CheckCircle, Shield } from 'lucide-react';
+import { Activity, Users, CheckCircle, Shield, ShoppingBag } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface SidebarProps {
   activePage?: string;
@@ -31,6 +32,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       icon: <Shield className="w-5 h-5" />,
       href: '/officers',
     },
+    {
+      id: 'product',
+      label: 'Manage Products',
+      icon: <ShoppingBag className="w-5 h-5" />,
+      href: '/products',
+    }
   ];
 
   return (
@@ -55,9 +62,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       {/* Navigation Menu */}
       <nav className="p-4 space-y-2">
         {navItems.map((item) => (
-          <a
+          <Link
             key={item.id}
-            href={item.href}
+            to={item.href}
             className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium text-sm transition-all duration-300 group ${
               activePage === item.id
                 ? 'bg-white/15 text-white border-l-4 border-amber-500'
@@ -66,7 +73,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
           >
             {item.icon}
             <span>{item.label}</span>
-          </a>
+            
+          </Link>
+          
         ))}
       </nav>
 
@@ -74,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-emerald-600">
         <div className="text-emerald-300 text-xs text-center">
           <p className="font-medium">Version 1.0.0</p>
-          <p className="mt-1 opacity-75">© 2024 CIS Portal</p>
+          <p className="mt-1 opacity-75">© 2025 CIS Portal</p>
         </div>
       </div>
     </aside>

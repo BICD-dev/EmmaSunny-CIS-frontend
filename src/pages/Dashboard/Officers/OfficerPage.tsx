@@ -8,9 +8,7 @@ interface Officer {
   email: string;
   phoneNumber: string;
   role: 'Admin' | 'Staff';
-  status: 'Active' | 'Inactive';
   createdAt: string;
-  lastActive: string;
 }
 
 const OfficersPage: React.FC = () => {
@@ -25,9 +23,7 @@ const OfficersPage: React.FC = () => {
       email: 'admin@cisportal.com',
       phoneNumber: '+234 801 234 5678',
       role: 'Admin',
-      status: 'Active',
       createdAt: '2024-01-15',
-      lastActive: '2 minutes ago',
     },
     {
       id: '2',
@@ -35,9 +31,7 @@ const OfficersPage: React.FC = () => {
       email: 'sarah.johnson@cisportal.com',
       phoneNumber: '+234 802 345 6789',
       role: 'Staff',
-      status: 'Active',
-      createdAt: '2024-02-20',
-      lastActive: '1 hour ago',
+      createdAt: '2024-02-20'
     },
     {
       id: '3',
@@ -45,9 +39,7 @@ const OfficersPage: React.FC = () => {
       email: 'michael.chen@cisportal.com',
       phoneNumber: '+234 803 456 7890',
       role: 'Staff',
-      status: 'Active',
       createdAt: '2024-03-10',
-      lastActive: '3 hours ago',
     },
     {
       id: '4',
@@ -55,9 +47,7 @@ const OfficersPage: React.FC = () => {
       email: 'emily.davis@cisportal.com',
       phoneNumber: '+234 804 567 8901',
       role: 'Staff',
-      status: 'Inactive',
       createdAt: '2024-01-25',
-      lastActive: '2 days ago',
     },
   ];
 
@@ -68,7 +58,7 @@ const OfficersPage: React.FC = () => {
 
   const getRoleBadge = (role: string) => {
     return role === 'Admin'
-      ? 'bg-purple-100 text-purple-700'
+      ? 'bg-emerald-100 text-emerald-700'
       : 'bg-blue-100 text-blue-700';
   };
 
@@ -125,7 +115,7 @@ const OfficersPage: React.FC = () => {
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <div className="flex items-center justify-between mb-3">
-            <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
+            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
               <Shield className="w-6 h-6" />
             </div>
           </div>
@@ -169,12 +159,6 @@ const OfficersPage: React.FC = () => {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                  Last Active
-                </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Actions
                 </th>
@@ -212,14 +196,6 @@ const OfficersPage: React.FC = () => {
                     <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getRoleBadge(officer.role)}`}>
                       {officer.role}
                     </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getStatusBadge(officer.status)}`}>
-                      {officer.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                    {officer.lastActive}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">

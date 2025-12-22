@@ -6,6 +6,7 @@ import CustomersPage from "./pages/Dashboard/Customers/CustomerPage";
 import { Routes, Route } from "react-router-dom";
 import OfficersPage from "./pages/Dashboard/Officers/OfficerPage";
 import VerifyCustomersPage from "./pages/Dashboard/Customers/VerifyCustomersPage";
+import ProductPage from "./pages/Dashboard/Product/ProductPage";
 const App: React.FC = () => {
   return (
     <div className="App">
@@ -56,7 +57,17 @@ const App: React.FC = () => {
             <OfficersPage />
           </Layout>
         }
-        />
+          />
+        <Route path="/products"
+        element={
+          <Layout
+          activePage="Products"
+          pageTitle="Manage Products"
+          pageSubtitle="View and manage all Products"
+          >
+            <ProductPage/>
+          </Layout>
+        } />
       </Routes>
     </div>
   );

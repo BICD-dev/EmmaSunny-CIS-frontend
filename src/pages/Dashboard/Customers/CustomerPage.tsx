@@ -6,14 +6,18 @@ import { Search, Filter, Plus, Users, Eye, Edit, Trash2, Download, Calendar, Pho
 interface Customer {
   id: string;
   customerCode: string;
-  fullName: string;
+  fullName: string; //fullname is first_name + last_name
   email: string;
-  phoneNumber: string;
+  phone: string;
   dateOfBirth: string;
-  gender: 'Male' | 'Female' | 'Other';
-  registrationDate: string;
-  expiryDate: string;
-  status: 'Active' | 'Expired';
+  gender: 'Male' | 'Female' ;
+  registrationDate: string; //created_at
+  expiryDate: string; //calculated based on creation date
+  status: 'Active' | 'Expired'; //based on is_active
+//   profile_image:string,
+// product:string, //display product based on the product_id,
+// registered_by:string //gotten based on officer_id
+// last_visit:string //explanatory
 }
 
 const CustomersPage: React.FC = () => {
@@ -29,7 +33,7 @@ const CustomersPage: React.FC = () => {
       customerCode: 'CIS-2024-001234',
       fullName: 'John Doe',
       email: 'john.doe@email.com',
-      phoneNumber: '+234 801 234 5678',
+      phone: '+234 801 234 5678',
       dateOfBirth: '1990-05-15',
       gender: 'Male',
       registrationDate: '2024-01-15',
@@ -41,7 +45,7 @@ const CustomersPage: React.FC = () => {
       customerCode: 'CIS-2024-005678',
       fullName: 'Jane Smith',
       email: 'jane.smith@email.com',
-      phoneNumber: '+234 802 345 6789',
+      phone: '+234 802 345 6789',
       dateOfBirth: '1988-08-22',
       gender: 'Female',
       registrationDate: '2024-02-20',
@@ -53,7 +57,7 @@ const CustomersPage: React.FC = () => {
       customerCode: 'CIS-2023-009876',
       fullName: 'Mike Johnson',
       email: 'mike.johnson@email.com',
-      phoneNumber: '+234 803 456 7890',
+      phone: '+234 803 456 7890',
       dateOfBirth: '1985-03-10',
       gender: 'Male',
       registrationDate: '2023-12-10',
@@ -65,7 +69,7 @@ const CustomersPage: React.FC = () => {
       customerCode: 'CIS-2024-004321',
       fullName: 'Sarah Williams',
       email: 'sarah.williams@email.com',
-      phoneNumber: '+234 804 567 8901',
+      phone: '+234 804 567 8901',
       dateOfBirth: '1992-11-28',
       gender: 'Female',
       registrationDate: '2024-03-05',
@@ -77,7 +81,7 @@ const CustomersPage: React.FC = () => {
       customerCode: 'CIS-2024-007890',
       fullName: 'David Brown',
       email: 'david.brown@email.com',
-      phoneNumber: '+234 805 678 9012',
+      phone: '+234 805 678 9012',
       dateOfBirth: '1995-07-14',
       gender: 'Male',
       registrationDate: '2024-04-12',
@@ -169,7 +173,6 @@ const CustomersPage: React.FC = () => {
                 <option>All Genders</option>
                 <option>Male</option>
                 <option>Female</option>
-                <option>Other</option>
               </select>
             </div>
             <div>
@@ -274,7 +277,7 @@ const CustomersPage: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-2 text-sm text-slate-700">
                         <Phone className="w-4 h-4 text-slate-400" />
-                        {customer.phoneNumber}
+                        {customer.phone}
                       </div>
                     </div>
                   </td>
