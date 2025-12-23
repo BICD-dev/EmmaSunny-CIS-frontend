@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import Layout from '../../../components/Layout/Layout';
 import { Search, Filter, Plus, Shield, Mail, Phone, Edit, Trash2, Eye } from 'lucide-react';
-
-interface Officer {
+import { useOfficers } from '../../../hooks/useOfficer';
+import type { Officer } from '../../../api/officerApi';
+import AddOfficerModal from '../../../components/AddOfficer';
+interface Officers {
   id: string;
   fullName: string;
   email: string;
@@ -14,42 +16,15 @@ interface Officer {
 const OfficersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
-
-  // Mock data
-  const officers: Officer[] = [
-    {
-      id: '1',
-      fullName: 'Admin User',
-      email: 'admin@cisportal.com',
-      phoneNumber: '+234 801 234 5678',
-      role: 'Admin',
-      createdAt: '2024-01-15',
-    },
-    {
-      id: '2',
-      fullName: 'Sarah Johnson',
-      email: 'sarah.johnson@cisportal.com',
-      phoneNumber: '+234 802 345 6789',
-      role: 'Staff',
-      createdAt: '2024-02-20'
-    },
-    {
-      id: '3',
-      fullName: 'Michael Chen',
-      email: 'michael.chen@cisportal.com',
-      phoneNumber: '+234 803 456 7890',
-      role: 'Staff',
-      createdAt: '2024-03-10',
-    },
-    {
-      id: '4',
-      fullName: 'Emily Davis',
-      email: 'emily.davis@cisportal.com',
-      phoneNumber: '+234 804 567 8901',
-      role: 'Staff',
-      createdAt: '2024-01-25',
-    },
-  ];
+  const {data:officerData, isError, isLoading, isSuccess} = useOfficers();
+  const officers = officerData?.map((officer: Officer)=>({
+    id: officer.id,
+    fullName: officer.first_name + ' ' + officer.last_name,
+    phoneNumber: officer.phone,
+    role: officer.role as 'Admin' | 'Staff',
+    email: officer.email,
+    createdAt: officer.created_at,
+  })) || [];
 
   const filteredOfficers = officers.filter(officer =>
     officer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -238,25 +213,7 @@ const OfficersPage: React.FC = () => {
 
       {/* Add Officer Modal Placeholder */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6">Add New Officer</h3>
-            <p className="text-slate-600 mb-6">
-              This is a placeholder for the add officer form. Implement form fields and submission logic here.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 px-6 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button className="flex-1 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium">
-                Add Officer
-              </button>
-            </div>
-          </div>
-        </div>
+        <AddOfficerModal onClose={() => setShowAddModal(false)}/>
       )}
     </Layout>
   );
