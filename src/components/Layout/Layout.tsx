@@ -1,6 +1,7 @@
 import React from 'react';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import { useOfficer } from '../../hooks/useOfficer';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ const Layout: React.FC<LayoutProps> = ({
   pageTitle,
   pageSubtitle,
 }) => {
+  const {data:officer, isError, isLoading, isSuccess} = useOfficer();
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Sidebar */}
@@ -24,8 +26,8 @@ const Layout: React.FC<LayoutProps> = ({
       <Topbar
         title={pageTitle}
         subtitle={pageSubtitle}
-        userName="Admin User"
-        userRole="Administrator"
+        userName={officer?.first_name + ' ' + officer?.last_name || 'Officer'}
+        userRole={officer?.role || 'Role'}
         notificationCount={3}
       />
 
