@@ -27,7 +27,7 @@ import {
   Legend,
 } from 'recharts';
 import Layout from '../../components/Layout/Layout';
-
+import { useCustomers, useCustomerStatistics } from '../../hooks/useCustomer';
 // Types
 interface StatCardProps {
   icon: React.ReactNode;
@@ -65,10 +65,6 @@ const registrationData = [
   { month: 'Dec', registrations: 189, verifications: 176 },
 ];
 
-const statusData = [
-  { name: 'Active', value: 2341, color: '#10B981' },
-  { name: 'Expired', value: 506, color: '#F59E0B' },
-];
 
 const verificationData = [
   { day: 'Mon', count: 45 },
@@ -81,10 +77,18 @@ const verificationData = [
 ];
 
 const DashboardPage: React.FC = () => {
+  //  const { data: customers, isLoading, isError, error } = useCustomers();
+    const { data: statistics, isLoading, isError, error } = useCustomerStatistics();
+    // put the value here dynamcally after fetching
+  const statusData = [
+    { name: 'Active', value: statistics?.active_customers || 0, color: '#10B981' },
+    { name: 'Expired', value: statistics?.expired_customers || 0, color: '#F59E0B' },
+  ];
+  // i will put the value here dynamically after fetching
   const stats: StatCardProps[] = [
     {
       icon: <Users className="w-6 h-6" />,
-      value: 2847,
+      value: statistics?.total_customers || NaN,
       label: 'Total Registered Customers',
       trend: 12,
       trendUp: true,
@@ -92,7 +96,7 @@ const DashboardPage: React.FC = () => {
     },
     {
       icon: <CheckCircle className="w-6 h-6" />,
-      value: 2341,
+      value: statistics?.active_customers || 0,
       label: 'Active ID Cards',
       trend: 8,
       trendUp: true,
@@ -100,7 +104,7 @@ const DashboardPage: React.FC = () => {
     },
     {
       icon: <AlertTriangle className="w-6 h-6" />,
-      value: 506,
+      value: statistics?.expired_customers || 0,
       label: 'Expired ID Cards',
       trend: 3,
       trendUp: false,
@@ -108,7 +112,7 @@ const DashboardPage: React.FC = () => {
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
-      value: 142,
+      value: statistics?.registered_this_month || NaN,
       label: 'New This Month',
       trend: 24,
       trendUp: true,
@@ -152,16 +156,16 @@ const DashboardPage: React.FC = () => {
       id: '1',
       title: 'IDs Expiring This Week',
       description:
-        '47 customer ID cards are scheduled to expire within the next 7 days.',
-      count: 47,
+        `${statistics?.expiring_this_week || NaN} customer ID cards are scheduled to expire within the next 7 days.`,
+      count: statistics?.expiring_this_week || NaN,
       icon: <Clock className="w-5 h-5" />,
     },
     {
       id: '2',
       title: 'IDs Expiring This Month',
       description:
-        '183 customer ID cards will expire by the end of December.',
-      count: 183,
+        `${statistics?.expiring_this_month || NaN} customer ID cards will expire by the end of December.`,
+      count: statistics?.expiring_this_month || NaN,
       icon: <Calendar className="w-5 h-5" />,
     },
   ];
