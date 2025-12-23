@@ -7,13 +7,22 @@ import { Routes, Route } from "react-router-dom";
 import OfficersPage from "./pages/Dashboard/Officers/OfficerPage";
 import VerifyCustomersPage from "./pages/Dashboard/Customers/VerifyCustomersPage";
 import ProductPage from "./pages/Dashboard/Product/ProductPage";
+import Login from "./pages/auth/Login";
+import PrivateRoute from "./components/PrivateRoute";
+import { Toaster } from "react-hot-toast";
 const App: React.FC = () => {
   return (
     <div className="App">
+       <Toaster position="top-right" reverseOrder={false} />
       <Routes>
+        <Route path="/login"
+        element={
+          <Login/>
+        }/>
         <Route
           path="/dashboard"
           element={
+            <PrivateRoute>
             <Layout
               activePage="dashboard"
               pageTitle="Dashboard"
@@ -21,11 +30,13 @@ const App: React.FC = () => {
             >
               <DashboardPage />
             </Layout>
+            </PrivateRoute>
           }
         />
         <Route
           path="/customers"
           element={
+            <PrivateRoute>
             <Layout
               activePage="customers"
               pageTitle="Manage Customers"
@@ -33,10 +44,12 @@ const App: React.FC = () => {
             >
               <CustomersPage />
             </Layout>
+            </PrivateRoute>
           }
         />
         <Route path="/verify"
         element={
+          <PrivateRoute>
           <Layout
             activePage="verify"
             pageTitle="Verify Customers"
@@ -44,11 +57,13 @@ const App: React.FC = () => {
           >
             <VerifyCustomersPage />
           </Layout>
+          </PrivateRoute>
         }
         />
 
         <Route path="/officers"
         element={
+          <PrivateRoute>
           <Layout
             activePage="officers"
             pageTitle="Manage Officers"
@@ -56,10 +71,12 @@ const App: React.FC = () => {
           >
             <OfficersPage />
           </Layout>
+          </PrivateRoute>
         }
           />
         <Route path="/products"
         element={
+          <PrivateRoute>
           <Layout
           activePage="Products"
           pageTitle="Manage Products"
@@ -67,6 +84,7 @@ const App: React.FC = () => {
           >
             <ProductPage/>
           </Layout>
+          </PrivateRoute>
         } />
       </Routes>
     </div>
