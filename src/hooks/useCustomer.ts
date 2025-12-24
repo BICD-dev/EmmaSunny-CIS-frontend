@@ -64,7 +64,7 @@ export const useCreateCustomer = () => {
         
         try {
           // Use the authenticated API client to download
-          const downloadResponse = await apiClient.get(`/customers/id-card/${filename}`, {
+          const downloadResponse = await apiClient.get(`/customer/id-card/${filename}`, {
             responseType: 'blob',
             timeout: 30000, // 30 second timeout for large files
           });
