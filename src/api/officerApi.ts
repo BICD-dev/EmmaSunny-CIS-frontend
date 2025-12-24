@@ -33,6 +33,12 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
 }
+export interface ProductApiResponse<T> {
+  status: boolean;
+  code: number;
+  message: string;
+  product: T;
+}
 
 // API Functions
 export const officerApi = {

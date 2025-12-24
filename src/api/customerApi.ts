@@ -21,6 +21,10 @@ export interface Customer {
   profile_image: string;
   product_id: string;
   officer_id: string;
+  idCardPath?:string;
+  product:{
+    product_name:string;
+  }
 }
 
 export interface CustomerStatistics {
@@ -40,7 +44,6 @@ export interface CreateCustomerData {
   gender: string;
   DateOfBirth?: string;
   product_id: string;
-  officer_id: string;
   address: string;
 }
 

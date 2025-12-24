@@ -9,7 +9,7 @@ interface Officers {
   fullName: string;
   email: string;
   phoneNumber: string;
-  role: 'Admin' | 'Staff';
+  role: 'admin' | 'staff';
   createdAt: string;
 }
 
@@ -21,7 +21,7 @@ const OfficersPage: React.FC = () => {
     id: officer.id,
     fullName: officer.first_name + ' ' + officer.last_name,
     phoneNumber: officer.phone,
-    role: officer.role as 'Admin' | 'Staff',
+    role: officer.role as 'admin' | 'staff',
     email: officer.email,
     createdAt: officer.created_at,
   })) || [];
@@ -84,7 +84,7 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">4</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{officers.length}</div>
           <div className="text-sm text-slate-500 font-medium">Total Officers</div>
         </div>
 
@@ -94,7 +94,7 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">1</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{officers.filter(o => o.role === 'admin').length}</div>
           <div className="text-sm text-slate-500 font-medium">Administrators</div>
         </div>
 
@@ -104,7 +104,7 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">3</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{officers.filter(o => o.role === 'staff').length}</div>
           <div className="text-sm text-slate-500 font-medium">Staff Members</div>
         </div>
 

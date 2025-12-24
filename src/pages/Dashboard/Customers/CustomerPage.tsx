@@ -4,17 +4,16 @@ import Layout from '../../../components/Layout/Layout';
 import { Search, Filter, Plus, Users, Eye, Edit, Trash2, Download, Calendar, Phone, Mail } from 'lucide-react';
 import { useCustomers, useCustomerStatistics } from '../../../hooks/useCustomer';
 import type { Customer } from '../../../api/customerApi';
-
+import AddCustomerModal from '../../../components/AddCustomer';
 const CustomersPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Expired'>('All');
   const [showFilters, setShowFilters] = useState(false);
-
+  const [showAddModal, setShowAddModal] = useState(false)
   // Fetch data using TanStack Query
   const { data: statistics, isLoading: statsLoading, isError: statsError } = useCustomerStatistics();
   const { data: customersData, isLoading: customersLoading, isError: customersError } = useCustomers();
-
   // Transform API data to match component interface
   const customers = customersData?.map((customer: Customer) => ({
     id: customer.id,
@@ -31,6 +30,7 @@ const CustomersPage: React.FC = () => {
     productId: customer.product_id,
     officerId: customer.officer_id,
     lastVisit: customer.last_visit,
+    product_name:customer.product.product_name
   })) || [];
 
   const filteredCustomers = customers?.filter(customer => {
@@ -123,7 +123,7 @@ const CustomersPage: React.FC = () => {
             <span className="text-sm font-medium">Export</span>
           </button>
           <button 
-            onClick={() => navigate('/customers/new')}
+            onClick={() => setShowAddModal(true)}
             className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium"
           >
             <Plus className="w-5 h-5" />
@@ -238,6 +238,9 @@ const CustomersPage: React.FC = () => {
                   Expiry
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">
@@ -288,6 +291,12 @@ const CustomersPage: React.FC = () => {
                       <div className="flex items-center gap-2 text-sm text-slate-700">
                         <Calendar className="w-4 h-4 text-slate-400" />
                         {customer.expiryDate ? new Date(customer.expiryDate).toLocaleDateString() : 'N/A'}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2 text-sm text-slate-700">
+                        <Calendar className="w-4 h-4 text-slate-400" />
+                        {customer.product_name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -343,6 +352,9 @@ const CustomersPage: React.FC = () => {
             </button>
           </div>
         </div>
+        {showAddModal && (
+          <AddCustomerModal onClose={()=>setShowAddModal(false)}/>
+        )}
       </div>
     </Layout>
   );
