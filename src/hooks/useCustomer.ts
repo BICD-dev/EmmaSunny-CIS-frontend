@@ -206,3 +206,22 @@ export function useDownloadIDCard() {
     },
   });
 }
+
+// Hook: Renew customer subscription
+export function useRenewCustomerSubscription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ customer_id, product_id }: { customer_id: string; product_id: string }) => {
+      return customerApi.renewCustomerSubscription(customer_id, product_id);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.customer_id) });
+      queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: customerKeys.statistics() });
+      toast.success('Customer subscription renewed successfully!');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to renew subscription');
+    },
+  });
+}

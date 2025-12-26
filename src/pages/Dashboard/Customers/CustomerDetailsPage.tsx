@@ -14,13 +14,31 @@ import {
   Clock,
   QrCode,
 } from "lucide-react";
-import { useCustomer, useDownloadIDCard } from "../../../hooks/useCustomer";
+import { useCustomer, useDownloadIDCard, useRenewCustomerSubscription } from "../../../hooks/useCustomer";
+import { useProducts } from "../../../hooks/useProduct";
 
 const CustomerDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: customer, isLoading, isError } = useCustomer(id || "");
   const downloadID = useDownloadIDCard();
+
+  // Renew modal state
+  const [showRenewModal, setShowRenewModal] = React.useState(false);
+  const [selectedProductId, setSelectedProductId] = React.useState<string>("");
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const renewMutation = useRenewCustomerSubscription();
+
+  const handleRenewClick = () => {
+    setShowRenewModal(true);
+  };
+
+  const handleRenewConfirm = () => {
+    if (!id || !selectedProductId) return;
+    renewMutation.mutate({ customer_id: id, product_id: selectedProductId }, {
+      onSuccess: () => setShowRenewModal(false)
+    });
+  };
 
   if (isLoading) {
     return (
@@ -292,9 +310,48 @@ const CustomerDetailsPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="pt-4 border-t border-slate-200">
-                  <button className="w-full px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors font-medium">
+                  <button
+                    className="w-full px-6 py-3 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors font-medium"
+                    onClick={handleRenewClick}
+                  >
                     Renew ID Card
                   </button>
+                  {showRenewModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 ">
+                      <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-xs">
+                        <h4 className="font-bold mb-4">Select Product to Renew</h4>
+                        <select
+                          className="w-full border rounded px-3 py-2 mb-4"
+                          value={selectedProductId}
+                          onChange={e => setSelectedProductId(e.target.value)}
+                          disabled={productsLoading}
+                        >
+                          <option value="">-- Select Product --</option>
+                          {products.map((product: any) => (
+                            <option key={product.id} value={product.id}>
+                              {product.product_name}
+                            </option>
+                          ))}
+                        </select>
+                        <div className="flex gap-2">
+                          <button
+                            className="flex-1 bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 disabled:opacity-60"
+                            onClick={handleRenewConfirm}
+                            disabled={!selectedProductId || renewMutation.isPending}
+                          >
+                            {renewMutation.isPending ? 'Renewing...' : 'Renew'}
+                          </button>
+                          <button
+                            className="flex-1 bg-slate-200 text-slate-700 px-4 py-2 rounded hover:bg-slate-300"
+                            onClick={() => setShowRenewModal(false)}
+                            disabled={renewMutation.isPending}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

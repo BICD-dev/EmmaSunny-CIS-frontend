@@ -93,5 +93,9 @@ export const customerApi = {
   downloadCustomerIDCard: async (filename: string) => {
     const response = await apiClient.get(`/customer/id-card/${filename}`, { responseType: 'blob' });
     return response;
+  },
+  renewCustomerSubscription: async (customer_id: string, product_id:string): Promise<ApiResponse<Customer>> => {
+    const response = await apiClient.post(`/customer/renew`, { customer_id, product_id });
+    return response.data;
   }
 };
