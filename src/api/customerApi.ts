@@ -9,7 +9,7 @@ export interface Customer {
   email: string;
   phone: string;
   address: string;
-  occuption?: string;
+  occupation?: string;
   last_visit?: string;
   gender: string;
   DateOfBirth?: string;
@@ -21,9 +21,14 @@ export interface Customer {
   profile_image: string;
   product_id: string;
   officer_id: string;
-  idCardPath?:string;
+  id_card?:string;
   product:{
     product_name:string;
+    price:string;
+  },
+  officer:{
+    first_name:string;
+    last_name:string;
   }
 }
 
@@ -45,6 +50,7 @@ export interface CreateCustomerData {
   DateOfBirth?: string;
   product_id: string;
   address: string;
+  profile_image?: File;
 }
 
 // API Functions
@@ -84,4 +90,8 @@ export const customerApi = {
     const response = await apiClient.delete(`/customer/${id}`);
     return response.data;
   },
+  downloadCustomerIDCard: async (filename: string) => {
+    const response = await apiClient.get(`/customer/id-card/${filename}`, { responseType: 'blob' });
+    return response;
+  }
 };
