@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Mail, Phone, Lock, Shield, MapPin, Calendar, Package } from 'lucide-react';
+import { X, User, Mail, Phone, Lock, Shield, MapPin, Calendar, Package, Camera } from 'lucide-react';
 import * as yup from 'yup';
 import { useCreateCustomer } from '../hooks/useCustomer';
 import { useProducts } from '../hooks/useProduct';
@@ -34,6 +34,7 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
   const { data: productResponse, isLoading: productLoading, isError: productError } = useProducts();
 
   const [formData, setFormData] = useState({
+    profile_image: undefined,
     first_name: '',
     last_name: '',
     email: '',
@@ -45,17 +46,24 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
 
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
 
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFormData((prev: any) => ({ ...prev, profile_image: file }));
+
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,7 +93,7 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
             formErrors[error.path] = error.message;
           }
         });
-
+        
         setErrors(formErrors);
       }
     }
@@ -111,6 +119,23 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-8">
+          {/* Profile Section */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-12 h-12 text-slate-400" />
+                )}
+              </div>
+              <label className="absolute bottom-1 right-1 bg-emerald-600 p-2 rounded-full cursor-pointer hover:bg-emerald-700">
+                <Camera className="w-4 h-4 text-white" />
+                <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+              </label>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Upload a clear passport-sized photo (JPG or PNG)</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* First Name */}
             <div>
