@@ -10,6 +10,7 @@ import ProductPage from "./pages/Dashboard/Product/ProductPage";
 import Login from "./pages/auth/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import { Toaster } from "react-hot-toast";
+import CustomerDetailsPage from "./pages/Dashboard/Customers/CustomerDetailsPage";
 const App: React.FC = () => {
   return (
     <div className="App">
@@ -47,6 +48,20 @@ const App: React.FC = () => {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/customers/:id"
+          element={
+            <PrivateRoute>
+            <Layout
+              activePage="customer"
+              pageTitle="Manage Customer Details"
+              pageSubtitle="View details of a customer"
+            >
+              <CustomerDetailsPage />
+            </Layout>
+            </PrivateRoute>
+          }
+        />
         <Route path="/verify"
         element={
           <PrivateRoute>
@@ -78,7 +93,7 @@ const App: React.FC = () => {
         element={
           <PrivateRoute>
           <Layout
-          activePage="Products"
+          activePage="products"
           pageTitle="Manage Products"
           pageSubtitle="View and manage all Products"
           >
