@@ -31,6 +31,7 @@ const products:Product[] = productResponse?.map((product) => ({
   description: product.description,
   price: product.price,
   valid_period: product.valid_period,
+  status: product.status,
   created_at: product.created_at,
   updated_at:product.updated_at
 })) || [];
@@ -126,7 +127,7 @@ const products:Product[] = productResponse?.map((product) => ({
         )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 mb-6">
+      <div className="grid grid-cols-2 gap-6 mb-6">
         <div className="bg-white rounded-2xl p-6 border border-slate-200 hover:shadow-lg transition-all">
           <div className="flex items-center justify-between mb-3">
             <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
@@ -137,7 +138,18 @@ const products:Product[] = productResponse?.map((product) => ({
           <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{products.length}</div>
           <div className="text-sm text-slate-500 font-medium">Total Products</div>
         </div>
-
+        <div className="bg-white rounded-2xl p-6 border border-slate-200 hover:shadow-lg transition-all">
+          <div className="flex items-center justify-between mb-3">
+            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600">
+              <Package className="w-6 h-6" />
+            </div>
+            <TrendingUp className="w-5 h-5 text-green-600" />
+          </div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{products?.filter(product => product.status === "active").length}</div>
+          <div className="text-sm text-slate-500 font-medium">Active Products</div>
+        </div>
+        </div>
+      <div>
         
 
       {/* Products Grid */}
@@ -153,10 +165,19 @@ const products:Product[] = productResponse?.map((product) => ({
                 <div className="p-3 rounded-xl bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all">
                   <Package className="w-6 h-6" />
                 </div>
-                
+                <span
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold mt-2 ${
+                        product?.status === "active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {product?.status === "active" ? "Active" : "Inactive"}
+                    </span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-2">{product.product_name}</h3>
               <p className="text-sm text-slate-600 line-clamp-2">{product.description}</p>
+              
             </div>
 
             {/* Product Body */}
@@ -186,10 +207,10 @@ const products:Product[] = productResponse?.map((product) => ({
 
               {/* Actions */}
               <div className="flex gap-2">
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm font-medium">
+                {/* <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm font-medium">
                   <Eye className="w-4 h-4" />
                   View
-                </button>
+                </button> */}
                 <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-medium">
                   <Edit className="w-4 h-4" />
                   Edit
