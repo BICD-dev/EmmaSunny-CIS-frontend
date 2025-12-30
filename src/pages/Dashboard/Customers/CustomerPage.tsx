@@ -21,7 +21,7 @@ const CustomersPage: React.FC = () => {
     fullName: `${customer.first_name} ${customer.last_name}`,
     email: customer.email,
     phone: customer.phone,
-    dateOfBirth: customer.date_of_birth || '',
+    dateOfBirth: customer.DateOfBirth || '',
     gender: customer.gender as 'Male' | 'Female',
     registrationDate: customer.created_at,
     expiryDate: customer.expiry_date || '',

@@ -13,6 +13,7 @@ interface AddCustomerModalProps {
  * Yup validation schema
  */
 const customerSchema = yup.object({
+  profile_image : yup.mixed().required('Profile image is required'),
   first_name: yup.string().trim().required('First name is required'),
   last_name: yup.string().trim().required('Last name is required'),
   address: yup.string().trim().required('Address is required'),
@@ -59,7 +60,26 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type (JPG, JPEG, PNG)
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
+    if (!validTypes.includes(file.type)) {
+      setErrors((prev) => ({ ...prev, profile_image: "Only JPG or PNG images are allowed" }));
+      setFormData((prev: any) => ({ ...prev, profile_image: undefined }));
+      setImagePreview(null);
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    const maxSize = 2 * 1024 * 1024; // 2MB
+    if (file.size > maxSize) {
+      setErrors((prev) => ({ ...prev, profile_image: "Image size must be less than 2MB" }));
+      setFormData((prev: any) => ({ ...prev, profile_image: undefined }));
+      setImagePreview(null);
+      return;
+    }
+
     setFormData((prev: any) => ({ ...prev, profile_image: file }));
+    setErrors((prev) => ({ ...prev, profile_image: "" }));
 
     const reader = new FileReader();
     reader.onloadend = () => setImagePreview(reader.result as string);
@@ -134,7 +154,10 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               </label>
             </div>
-            <p className="text-xs text-slate-500 mt-2">Upload a clear passport-sized photo (JPG or PNG)</p>
+            <p className="text-xs text-slate-500 mt-2">Upload a clear passport-sized photo (JPG or PNG, max 2MB)</p>
+            {errors.profile_image && (
+              <p className="text-red-500 text-xs mt-1">{errors.profile_image}</p>
+            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* First Name */}
@@ -332,11 +355,11 @@ const AddCustomerModal: React.FC<AddCustomerModalProps> = ({ onClose }) => {
                     }`}
                   >
                     <option value="">Select a product</option>
-                    {productResponse?.map((product: Product) => (
-                      <option key={product.id} value={product.id}>
-                        {product.product_name} - ₦{parseInt(product.price).toLocaleString()} ({product.valid_period} year
-                        {product.valid_period > 1 ? 's' : ''})
-                      </option>
+                      {productResponse?.filter(product => product.status === "active").map((product: Product) => (
+                        <option key={product.id} value={product.id}>
+                          {product.product_name} - ₦{parseInt(product.price).toLocaleString()} ({product.valid_period} year
+                          {product.valid_period > 1 ? 's' : ''})
+                        </option>
                     ))}
                   </select>
                 </div>

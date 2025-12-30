@@ -40,6 +40,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
     }
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = '#/login';
+  };
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-gradient-to-b from-emerald-700 to-emerald-800 shadow-2xl z-50">
       {/* Logo Section */}
@@ -80,8 +85,16 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       </nav>
 
       {/* Footer Section (Optional) */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-emerald-600">
-        <div className="text-emerald-300 text-xs text-center">
+      {/* Logout Button */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-emerald-600 flex flex-col items-center gap-2">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500 text-white font-semibold text-sm shadow-lg hover:bg-red-600 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-amber-400"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" /></svg>
+          Logout
+        </button>
+        <div className="text-emerald-300 text-xs text-center mt-2">
           <p className="font-medium">Version 1.0.0</p>
           <p className="mt-1 opacity-75">© 2025 CIS Portal</p>
         </div>
