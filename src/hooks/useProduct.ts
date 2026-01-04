@@ -59,7 +59,7 @@ export function useDeleteProduct() {
     mutationFn: (id: string) => productApi.deleteProduct(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-      toast.success('Product deleted successfully!');
+      toast.success('Product status changed successfully!');
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to delete Product');

@@ -10,6 +10,7 @@ import {
   Eye,
   Clock,
   TrendingUp,
+  AlertCircle,
 } from 'lucide-react';
 import { useProducts, useDeleteProduct } from '../../../hooks/useProduct';
 import type { Product  } from '../../../api/productApi';
@@ -21,8 +22,8 @@ const ProductPage: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const { data: productResponse, isLoading: isLoadingProducts , isError: isErrorProducts, isSuccess: isSuccessProducts } = useProducts();
-  const deleteMutation = useDeleteProduct(); //to delete
+  const { data: productResponse, isLoading: isLoadingProducts , isError: isErrorProducts, isSuccess: isSuccessProducts, error } = useProducts();
+  const deleteMutation = useDeleteProduct(); //to toggle the product status betweeen active and inactive
 
   // using data from api
 const products:Product[] = productResponse?.map((product) => ({
@@ -50,6 +51,77 @@ const products:Product[] = productResponse?.map((product) => ({
   const handleDelete = async (id:string)=>{
     deleteMutation.mutate(id);
   }
+
+    // Loading State
+  if (isLoadingProducts) {
+    return (
+      <Layout
+      activePage="products"
+      pageTitle="Products & Services"
+      pageSubtitle="Manage ID card products, pricing, and packages"
+    >
+      <div className="w-full">
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+          {/* Header Skeleton */}
+          <div className="p-6 border-b border-slate-200">
+            <div className="flex items-center justify-between">
+              <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse" />
+              <div className="h-10 w-64 bg-slate-200 rounded-lg animate-pulse" />
+            </div>
+          </div>
+
+          {/* Table Skeleton */}
+          <div className="p-6 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-slate-200 rounded-lg animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-slate-200 rounded w-1/4 animate-pulse" />
+                  <div className="h-3 bg-slate-200 rounded w-1/3 animate-pulse" />
+                </div>
+                <div className="h-4 bg-slate-200 rounded w-1/6 animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      </Layout>
+    );
+  }
+    if (isErrorProducts) {
+      return (
+        <Layout
+      activePage="products"
+      pageTitle="Products & Services"
+      pageSubtitle="Manage ID card products, pricing, and packages"
+    >
+        <div
+          className="w-full"
+        >
+          <div className="bg-white rounded-2xl border border-red-200 p-8">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                Failed to Load Product details
+              </h3>
+              <p className="text-slate-600 mb-4">
+                {error?.message || "An error occurred while fetching the data."}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+        </Layout>
+      );
+    }
+
   return (
     <Layout
       activePage="products"
@@ -207,19 +279,17 @@ const products:Product[] = productResponse?.map((product) => ({
 
               {/* Actions */}
               <div className="flex gap-2">
-                {/* <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm font-medium">
-                  <Eye className="w-4 h-4" />
-                  View
-                </button> */}
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-medium">
-                  <Edit className="w-4 h-4" />
-                  Edit
-                </button>
                 <button
                 onClick={()=>handleDelete(product.id)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors text-sm font-medium">
+                  <Edit className="w-4 h-4" />
+                  Change Status
+                </button>
+
+                {/* <button
                 className="p-2.5 border border-slate-200 rounded-xl hover:bg-red-50 hover:border-red-200 transition-colors text-slate-600 hover:text-red-600">
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

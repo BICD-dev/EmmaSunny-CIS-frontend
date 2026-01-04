@@ -1,48 +1,141 @@
-import React, { useState } from 'react';
-import Layout from '../../../components/Layout/Layout';
-import { Search, Filter, Plus, Shield, Mail, Phone, Edit, Trash2, Eye } from 'lucide-react';
-import { useOfficers } from '../../../hooks/useOfficer';
-import type { Officer } from '../../../api/officerApi';
-import AddOfficerModal from '../../../components/AddOfficer';
+import React, { useState } from "react";
+import Layout from "../../../components/Layout/Layout";
+import {
+  Search,
+  Filter,
+  Plus,
+  Shield,
+  Mail,
+  Phone,
+  Edit,
+  Trash2,
+  Eye,
+  AlertCircle,
+  Package,
+} from "lucide-react";
+import { useDeleteOfficer, useOfficers } from "../../../hooks/useOfficer";
+import type { Officer } from "../../../api/officerApi";
+import AddOfficerModal from "../../../components/AddOfficer";
 interface Officers {
   id: string;
   fullName: string;
   email: string;
   phoneNumber: string;
-  role: 'admin' | 'staff';
+  role: "admin" | "staff";
   createdAt: string;
 }
 
 const OfficersPage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
-  const {data:officerData, isError, isLoading, isSuccess} = useOfficers();
-  const officers = officerData?.map((officer: Officer)=>({
-    id: officer.id,
-    fullName: officer.first_name + ' ' + officer.last_name,
-    phoneNumber: officer.phone,
-    role: officer.role as 'admin' | 'staff',
-    email: officer.email,
-    createdAt: officer.created_at,
-  })) || [];
+  const {
+    data: officerData,
+    isError,
+    isLoading,
+    isSuccess,
+    error,
+  } = useOfficers();
+  const changeStatusMutation = useDeleteOfficer();
 
-  const filteredOfficers = officers.filter(officer =>
-    officer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    officer.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const officers =
+    officerData?.map((officer: Officer) => ({
+      id: officer.id,
+      fullName: officer.first_name + " " + officer.last_name,
+      phoneNumber: officer.phone,
+      role: officer.role as "admin" | "staff",
+      email: officer.email,
+      status: officer.status,
+      createdAt: officer.created_at,
+    })) || [];
+
+  const filteredOfficers = officers.filter(
+    (officer) =>
+      officer.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      officer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getRoleBadge = (role: string) => {
-    return role === 'Admin'
-      ? 'bg-emerald-100 text-emerald-700'
-      : 'bg-blue-100 text-blue-700';
+    return role === "Admin"
+      ? "bg-emerald-100 text-emerald-700"
+      : "bg-blue-100 text-blue-700";
   };
 
   const getStatusBadge = (status: string) => {
-    return status === 'Active'
-      ? 'bg-green-100 text-green-700'
-      : 'bg-gray-100 text-gray-700';
+    return status === "Active"
+      ? "bg-green-100 text-green-700"
+      : "bg-gray-100 text-gray-700";
   };
 
+  // Loading State
+  if (isLoading) {
+    return (
+      <Layout
+        activePage="officers"
+        pageTitle="Manage Officers"
+        pageSubtitle="Manage system users and their permissions"
+      >
+        <div className="w-full">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+            {/* Header Skeleton */}
+            <div className="p-6 border-b border-slate-200">
+              <div className="flex items-center justify-between">
+                <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse" />
+                <div className="h-10 w-64 bg-slate-200 rounded-lg animate-pulse" />
+              </div>
+            </div>
+
+            {/* Table Skeleton */}
+            <div className="p-6 space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-slate-200 rounded-lg animate-pulse" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-1/4 animate-pulse" />
+                    <div className="h-3 bg-slate-200 rounded w-1/3 animate-pulse" />
+                  </div>
+                  <div className="h-4 bg-slate-200 rounded w-1/6 animate-pulse" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  if (isError) {
+    return (
+      <Layout
+        activePage="officers"
+        pageTitle="Manage Officers"
+        pageSubtitle="Manage system users and their permissions"
+      >
+        <div className="w-full">
+          <div className="bg-white rounded-2xl border border-red-200 p-8">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                <AlertCircle className="w-8 h-8 text-red-600" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">
+                Failed to Load Officers details
+              </h3>
+              <p className="text-slate-600 mb-4">
+                {error?.message || "An error occurred while fetching the data."}
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+    const handleDelete = async (id:string)=>{
+    changeStatusMutation.mutate(id);
+  }
   return (
     <Layout
       activePage="officers"
@@ -84,8 +177,12 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{officers.length}</div>
-          <div className="text-sm text-slate-500 font-medium">Total Officers</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">
+            {officers.length}
+          </div>
+          <div className="text-sm text-slate-500 font-medium">
+            Total Officers
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
@@ -94,8 +191,12 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{officers.filter(o => o.role === 'admin').length}</div>
-          <div className="text-sm text-slate-500 font-medium">Administrators</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">
+            {officers.filter((o) => o.role === "admin").length}
+          </div>
+          <div className="text-sm text-slate-500 font-medium">
+            Administrators
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
@@ -104,8 +205,12 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">{officers.filter(o => o.role === 'staff').length}</div>
-          <div className="text-sm text-slate-500 font-medium">Staff Members</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">
+            {officers.filter((o) => o.role === "staff").length}
+          </div>
+          <div className="text-sm text-slate-500 font-medium">
+            Staff Members
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
@@ -114,7 +219,9 @@ const OfficersPage: React.FC = () => {
               <Shield className="w-6 h-6" />
             </div>
           </div>
-          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">3</div>
+          <div className="text-3xl font-bold text-slate-900 font-mono mb-1">
+            3
+          </div>
           <div className="text-sm text-slate-500 font-medium">Active Now</div>
         </div>
       </div>
@@ -141,16 +248,26 @@ const OfficersPage: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredOfficers.map((officer) => (
-                <tr key={officer.id} className="hover:bg-slate-50 transition-colors">
+                <tr
+                  key={officer.id}
+                  className="hover:bg-slate-50 transition-colors"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-sm">
-                        {officer.fullName.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                        {officer.fullName
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .substring(0, 2)}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900">{officer.fullName}</p>
+                        <p className="font-semibold text-slate-900">
+                          {officer.fullName}
+                        </p>
                         <p className="text-sm text-slate-500">
-                          Joined {new Date(officer.createdAt).toLocaleDateString()}
+                          Joined{" "}
+                          {new Date(officer.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
@@ -168,20 +285,32 @@ const OfficersPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold ${getRoleBadge(officer.role)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-lg text-xs font-semibold ${getRoleBadge(
+                        officer.role
+                      )}`}
+                    >
                       {officer.role}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-emerald-600">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-blue-600">
+                      
+
+                        <span
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold mt-2 ${
+                            officer?.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {officer?.status === "active" ? "Active" : "Inactive"}
+                        </span>
+                      <button
+                      onClick={()=>handleDelete(officer.id)}
+                      className="flex items-center gap-2 center p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-blue-600 cursor-pointer">
                         <Edit className="w-4 h-4" />
-                      </button>
-                      <button className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-red-600">
-                        <Trash2 className="w-4 h-4" />
+                        Change Officer Status
                       </button>
                     </div>
                   </td>
@@ -194,17 +323,24 @@ const OfficersPage: React.FC = () => {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
           <div className="text-sm text-slate-600">
-            Showing <span className="font-semibold">1</span> to <span className="font-semibold">4</span> of{' '}
+            Showing <span className="font-semibold">1</span> to{" "}
+            <span className="font-semibold">4</span> of{" "}
             <span className="font-semibold">4</span> results
           </div>
           <div className="flex items-center gap-2">
-            <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button
+              className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+            >
               Previous
             </button>
             <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
               1
             </button>
-            <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+            <button
+              className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+            >
               Next
             </button>
           </div>
@@ -213,7 +349,7 @@ const OfficersPage: React.FC = () => {
 
       {/* Add Officer Modal Placeholder */}
       {showAddModal && (
-        <AddOfficerModal onClose={() => setShowAddModal(false)}/>
+        <AddOfficerModal onClose={() => setShowAddModal(false)} />
       )}
     </Layout>
   );
