@@ -21,12 +21,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       href: '/customers',
     },
     {
-      id: 'verify',
-      label: 'Verify Customers',
-      icon: <CheckCircle className="w-5 h-5" />,
-      href: '/verify',
-    },
-    {
       id: 'officers',
       label: 'Manage Officers',
       icon: <Shield className="w-5 h-5" />,
@@ -37,6 +31,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       label: 'Manage Products',
       icon: <ShoppingBag className="w-5 h-5" />,
       href: '/products',
+    },{
+      id:'activity',
+      label:'View Activity logs',
+      icon: <Activity className="w-5 h-5" />,
+      href:"/activity"
     }
   ];
 
