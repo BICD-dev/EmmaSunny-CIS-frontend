@@ -11,6 +11,7 @@ import Login from "./pages/auth/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import { Toaster } from "react-hot-toast";
 import CustomerDetailsPage from "./pages/Dashboard/Customers/CustomerDetailsPage";
+import ActivityLogPage from "./pages/Dashboard/Officers/ActivityLogPage";
 
 const App: React.FC = () => {
   return (
@@ -102,6 +103,20 @@ const App: React.FC = () => {
                 pageSubtitle="View and manage all Products"
               >
                 <ProductPage />
+              </Layout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/activity"
+          element={
+            <PrivateRoute>
+              <Layout
+                activePage="activity"
+                pageTitle="View Activity Logs"
+                pageSubtitle="View all activity made on the system by officers"
+              >
+                <ActivityLogPage />
               </Layout>
             </PrivateRoute>
           }

@@ -9,6 +9,7 @@ export const officerKeys = {
   list: (filters?: string) => [...officerKeys.lists(), { filters }] as const,
   details: () => [...officerKeys.all, 'detail'] as const,
   detail: () => [...officerKeys.details()] as const,
+  logs: () => ['officers','logs'] as const
 };
 
 // Hook: Get all officers
@@ -40,10 +41,10 @@ export function useLogin() {
     mutationFn: (data: LoginData) => officerApi.login(data),
     onSuccess: (data) => {
       localStorage.setItem('token', data.data.token);
-      toast.success('Login successful!');
+      toast.success(data.message || 'Login successful!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(error.response.data.message || 'Login failed');
     },
   });
 }
@@ -92,10 +93,23 @@ export function useDeleteOfficer() {
     mutationFn: (id: string) => officerApi.deleteOfficer(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: officerKeys.lists() });
-      toast.success('Officer deleted successfully!');
+      toast.success('Officer status changed successfully!');
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete officer');
+      toast.error(error.response?.data?.message || 'Failed to chenge officer status');
+    },
+  });
+}
+
+// Hook get activity logs of all officers
+export function useActivityLogs() {
+  return useQuery({
+    queryKey: officerKeys.logs(),
+    queryFn: async () => {
+      const response = await officerApi.activtyLog();
+      console.log("inside hook",response )
+      return response.data
+
     },
   });
 }

@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient } from "./client";
 
 // Types
 export interface Officer {
@@ -9,6 +9,7 @@ export interface Officer {
   email: string;
   phone: string;
   role: string;
+  status:"active" | "inactive";
   created_at: string;
   updated_at: string;
 }
@@ -39,18 +40,32 @@ export interface ProductApiResponse<T> {
   message: string;
   product: T;
 }
+export interface ActivityLogResponse<T> {
+  status: boolean;
+  code: number;
+  message: string;
+  data:T
+}
+
+export interface ActivityPayload {
+      id: string;
+      officer_id: string;
+      fullname: string;
+      action: string;
+      timestamp: string;
+}
 
 // API Functions
 export const officerApi = {
   // Login
   login: async (data: LoginData): Promise<LoginResponse> => {
-    const response = await apiClient.post('/auth/login', data);
+    const response = await apiClient.post("/auth/login", data);
     return response.data;
   },
 
   // Get all officers
   getAllOfficers: async (): Promise<ApiResponse<Officer[]>> => {
-    const response = await apiClient.get('/officer');
+    const response = await apiClient.get("/officer");
     return response.data;
   },
 
@@ -61,20 +76,31 @@ export const officerApi = {
   },
 
   // Create officer
-  createOfficer: async (data: Partial<Officer>): Promise<ApiResponse<Officer>> => {
-    const response = await apiClient.post('/auth/register', data);
+  createOfficer: async (
+    data: Partial<Officer>
+  ): Promise<ApiResponse<Officer>> => {
+    const response = await apiClient.post("/auth/register", data);
     return response.data;
   },
 
   // Update officer
-  updateOfficer: async (id: string, data: Partial<Officer>): Promise<ApiResponse<Officer>> => {
+  updateOfficer: async (
+    id: string,
+    data: Partial<Officer>
+  ): Promise<ApiResponse<Officer>> => {
     const response = await apiClient.put(`/officer/${id}`, data);
     return response.data;
   },
 
   // Delete officer
   deleteOfficer: async (id: string): Promise<ApiResponse<null>> => {
-    const response = await apiClient.delete(`/officer/${id}`);
+    const response = await apiClient.delete(`/officer/delete/${id}`);
     return response.data;
   },
+  // activity logs
+  activtyLog: async (): Promise<ActivityLogResponse<ActivityPayload[]>> => {
+    const response = await apiClient.get("/officer/logs");
+    console.log("straght from the api",response.data)
+    return response.data;
+  }, 
 };
