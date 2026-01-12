@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../../components/Layout/Layout';
-import { Search, Filter, Plus, Users, Eye, Edit, Trash2, Download, Calendar, Phone, Mail } from 'lucide-react';
+import { Search, Filter, Plus, Users, Eye, Edit, Trash2, Download, Calendar, Phone, Mail, MoveRight, MoveLeft } from 'lucide-react';
 import { useCustomers, useCustomerStatistics, useDeleteCustomer, useDownloadCustomerCsv } from '../../../hooks/useCustomer';
 import { customerApi, type Customer } from '../../../api/customerApi';
 import AddCustomerModal from '../../../components/AddCustomer';
+import EditCustomerModal from '../../../components/EditCustomerModal';
 const CustomersPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'All' | 'Active' | 'Expired'>('All');
   const [showFilters, setShowFilters] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editModal, setEditModal] = useState(false);
+
   // Fetch data using TanStack Query
   const { data: statistics, isLoading: statsLoading, isError: statsError } = useCustomerStatistics();
   const { data: customersData, isLoading: customersLoading, isError: customersError } = useCustomers();
   const downloadCsv = useDownloadCustomerCsv()
   const {mutateAsync:deleteMutation} = useDeleteCustomer()
-
+  
   // Transform API data to match component interface
   const customers = customersData?.map((customer: Customer) => ({
     id: customer.id,
@@ -47,6 +52,17 @@ const CustomersPage: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
+    // Pagination logic
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentCustomers = filteredCustomers.slice(startIndex, endIndex);
+
+  // handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   const getStatusBadge = (status: string) => {
     return status === 'Active'
       ? 'bg-green-100 text-green-700'
@@ -261,7 +277,7 @@ const CustomersPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredCustomers.map((customer) => (
+                currentCustomers.map((customer) => (
                   <tr key={customer.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
@@ -321,6 +337,7 @@ const CustomersPage: React.FC = () => {
                         <button 
                           className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-blue-600"
                           title="Edit customer"
+
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -341,26 +358,91 @@ const CustomersPage: React.FC = () => {
         </div>
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-          <div className="text-sm text-slate-600">
-            Showing <span className="font-semibold">1</span> to <span className="font-semibold">{filteredCustomers.length}</span> of{' '}
-            <span className="font-semibold">{customers.length}</span> results
+        {filteredCustomers.length > 0 && (
+          <div className="px-6 py-4 border-t border-slate-200 bg-slate-50">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Results Info */}
+              <div className="text-sm text-slate-600">
+                Showing{" "}
+                <span className="font-semibold text-slate-900">
+                  {startIndex + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-semibold text-slate-900">
+                  {Math.min(endIndex, filteredCustomers.length)}
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold text-slate-900">
+                  {filteredCustomers.length}
+                </span>{" "}
+                results
+              </div>
+
+              {/* Pagination Controls */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="p-2 border border-slate-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                >
+                  <MoveLeft className="w-5 h-5 text-slate-600" />
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === pageNum
+                              ? "bg-emerald-600 text-white shadow-md"
+                              : "border border-slate-300 hover:bg-white text-slate-700"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      pageNum === currentPage - 2 ||
+                      pageNum === currentPage + 2
+                    ) {
+                      return (
+                        <span key={pageNum} className="px-2 text-slate-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="p-2 border border-slate-300 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                >
+                  <MoveRight className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-              Previous
-            </button>
-            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
-              1
-            </button>
-            <button className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-              Next
-            </button>
-          </div>
-        </div>
+        )}
+
         {showAddModal && (
           <AddCustomerModal onClose={()=>setShowAddModal(false)}/>
         )}
+        {/* {editModal && (
+          // <EditCustomerModal onClose={()=>setEditModal(false)} customer_id={} />
+        )} */}
       </div>
     </Layout>
   );
