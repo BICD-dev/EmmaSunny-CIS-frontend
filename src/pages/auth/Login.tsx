@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLogin } from '../../hooks/useOfficer';
-
+import { Eye, EyeOff } from 'lucide-react';
 const Login = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ username: '', password: '' });
+    const [showPassword, setShowPassword] = useState(false)
     const loginMutation = useLogin();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,9 +36,10 @@ const Login = () => {
                         required
                         />
                     </span>
-                    <span className="flex flex-col gap-2 ">
+                    <span className="flex flex-col gap-2 relative">
                         <label htmlFor="password" className="capitalize font-semibold">password</label>
-                        <input type="your password" 
+                        <input 
+                        type={showPassword ? "text" : "password"} 
                         placeholder="Password"
                         className="border border-gray-400 px-3 py-2 rounded-lg "
                         onChange={handleChange}
@@ -45,6 +47,12 @@ const Login = () => {
                         disabled={loginMutation.isPending}
                         required
                         />
+                        <span
+                        className="absolute right-3 top-[38px] cursor-pointer text-gray-600"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                    >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                    </span>
                     </span>
 
                     {/* Show error message */}
