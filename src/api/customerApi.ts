@@ -97,5 +97,9 @@ export const customerApi = {
   renewCustomerSubscription: async (customer_id: string, product_id:string): Promise<ApiResponse<Customer>> => {
     const response = await apiClient.post(`/customer/renew`, { customer_id, product_id });
     return response.data;
+  },
+  downloadCustomerCsv:async ()=>{
+    const response = await apiClient.get("/customer/download/csv");
+    return response.data;
   }
 };

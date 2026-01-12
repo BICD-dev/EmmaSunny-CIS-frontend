@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../../components/Layout/Layout';
 import { Search, Filter, Plus, Users, Eye, Edit, Trash2, Download, Calendar, Phone, Mail } from 'lucide-react';
-import { useCustomers, useCustomerStatistics } from '../../../hooks/useCustomer';
-import type { Customer } from '../../../api/customerApi';
+import { useCustomers, useCustomerStatistics, useDeleteCustomer, useDownloadCustomerCsv } from '../../../hooks/useCustomer';
+import { customerApi, type Customer } from '../../../api/customerApi';
 import AddCustomerModal from '../../../components/AddCustomer';
 const CustomersPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +14,9 @@ const CustomersPage: React.FC = () => {
   // Fetch data using TanStack Query
   const { data: statistics, isLoading: statsLoading, isError: statsError } = useCustomerStatistics();
   const { data: customersData, isLoading: customersLoading, isError: customersError } = useCustomers();
+  const downloadCsv = useDownloadCustomerCsv()
+  const {mutateAsync:deleteMutation} = useDeleteCustomer()
+
   // Transform API data to match component interface
   const customers = customersData?.map((customer: Customer) => ({
     id: customer.id,
@@ -118,7 +121,9 @@ const CustomersPage: React.FC = () => {
           </button>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+          <button
+          onClick={()=>downloadCsv.mutate()}
+          className="cursor-pointer flex items-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
             <Download className="w-4 h-4" />
             <span className="text-sm font-medium">Export</span>
           </button>
@@ -320,6 +325,7 @@ const CustomersPage: React.FC = () => {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
+                        onClick={()=>deleteMutation(customer.id)}
                           className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-red-600"
                           title="Delete customer"
                         >

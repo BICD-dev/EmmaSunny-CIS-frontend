@@ -206,6 +206,35 @@ export function useDownloadIDCard() {
     },
   });
 }
+export function useDownloadCustomerCsv() {
+  return useMutation({
+    mutationFn: async () => {
+      const response = await customerApi.downloadCustomerCsv();
+
+      // Create a blob URL
+      const url = window.URL.createObjectURL(new Blob([response]));
+
+      // Create a temporary anchor
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "customers.csv");
+
+      // Append → click → clean up
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    },
+
+    onSuccess: () => {
+      toast.success("customer list download initiated!");
+    },
+
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to download customer list");
+    },
+  });
+}
 
 // Hook: Renew customer subscription
 export function useRenewCustomerSubscription() {
