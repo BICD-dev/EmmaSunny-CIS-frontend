@@ -74,7 +74,7 @@ const CustomerDetailsPage: React.FC = () => {
       </Layout>
     );
   }
-  console.log("customer id:", customer?.id_card);
+  
   return (
     <Layout
       activePage="customers"

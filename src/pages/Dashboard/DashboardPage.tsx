@@ -88,7 +88,7 @@ const DashboardPage: React.FC = () => {
   const stats: StatCardProps[] = [
     {
       icon: <Users className="w-6 h-6" />,
-      value: statistics?.total_customers || NaN,
+      value: statistics?.total_customers || 0,
       label: 'Total Registered Customers',
       trend: 12,
       trendUp: true,
@@ -112,7 +112,7 @@ const DashboardPage: React.FC = () => {
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
-      value: statistics?.registered_this_month || NaN,
+      value: statistics?.registered_this_month || 0,
       label: 'New This Month',
       trend: 24,
       trendUp: true,
@@ -156,16 +156,16 @@ const DashboardPage: React.FC = () => {
       id: '1',
       title: 'IDs Expiring This Week',
       description:
-        `${statistics?.expiring_this_week || NaN} customer ID cards are scheduled to expire within the next 7 days.`,
-      count: statistics?.expiring_this_week || NaN,
+        `${statistics?.expiring_this_week || 0} customer ID cards are scheduled to expire within the next 7 days.`,
+      count: statistics?.expiring_this_week || 0,
       icon: <Clock className="w-5 h-5" />,
     },
     {
       id: '2',
       title: 'IDs Expiring This Month',
       description:
-        `${statistics?.expiring_this_month || NaN} customer ID cards will expire by the end of December.`,
-      count: statistics?.expiring_this_month || NaN,
+        `${statistics?.expiring_this_month || 0} customer ID cards will expire by the end of December.`,
+      count: statistics?.expiring_this_month || 0,
       icon: <Calendar className="w-5 h-5" />,
     },
   ];

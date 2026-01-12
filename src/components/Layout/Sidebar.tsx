@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       href: '/officers',
     },
     {
-      id: 'product',
+      id: 'products',
       label: 'Manage Products',
       icon: <ShoppingBag className="w-5 h-5" />,
       href: '/products',
