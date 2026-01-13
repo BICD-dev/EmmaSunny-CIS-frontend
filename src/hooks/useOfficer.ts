@@ -81,23 +81,23 @@ export function useCreateOfficer() {
 }
 
 // Hook: Update officer mutation
-export function useUpdateOfficer() {
-  const queryClient = useQueryClient();
+// export function useUpdateOfficer() {
+//   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Officer> }) =>
-      officerApi.updateOfficer(id, data),
-    onSuccess: (_, variables) => {
-      // Invalidate both the list and the specific officer detail
-      queryClient.invalidateQueries({ queryKey: officerKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: officerKeys.detail(variables.id) });
-      toast.success('Officer updated successfully!');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update officer');
-    },
-  });
-}
+//   return useMutation({
+//     mutationFn: ({ id, data }: { id: string; data: Partial<Officer> }) =>
+//       officerApi.updateOfficer(id, data),
+//     onSuccess: (_, variables) => {
+//       // Invalidate both the list and the specific officer detail
+//       queryClient.invalidateQueries({ queryKey: officerKeys.lists() });
+//       queryClient.invalidateQueries({ queryKey: officerKeys.detail(variables.id) });
+//       toast.success('Officer updated successfully!');
+//     },
+//     onError: (error: any) => {
+//       toast.error(error.response?.data?.message || 'Failed to update officer');
+//     },
+//   });
+// }
 
 // Hook: Delete officer mutation
 export function useDeleteOfficer() {

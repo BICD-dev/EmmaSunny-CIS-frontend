@@ -54,7 +54,7 @@ export function useMonthlyCustomerRegistrations() {
     queryKey: customerKeys.MonthlyRegistrations(),
     queryFn: async () => {
       const response = await customerApi.getMonthlyCustomersRegistration();
-      return response.data;
+      return response;
     },
   })
 }
