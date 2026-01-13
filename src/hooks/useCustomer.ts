@@ -11,6 +11,8 @@ export const customerKeys = {
   details: () => [...customerKeys.all, 'detail'] as const,
   detail: (id: string) => [...customerKeys.details(), id] as const,
   statistics: () => [...customerKeys.all, 'statistics'] as const,
+  MonthlyRegistrations: () => [...customerKeys.all, 'monthly-registrations'] as const,
+
 };
 
 // Hook: Get all customers
@@ -45,6 +47,16 @@ export function useCustomerStatistics() {
       return response.data;
     },
   });
+}
+
+export function useMonthlyCustomerRegistrations() {
+  return useQuery({
+    queryKey: customerKeys.MonthlyRegistrations(),
+    queryFn: async () => {
+      const response = await customerApi.getMonthlyCustomersRegistration();
+      return response.data;
+    },
+  })
 }
 
 export const useCreateCustomer = () => {
@@ -146,8 +158,33 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Customer> }) =>
-      customerApi.updateCustomer(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Customer> & { profile_image?: File | string } }) => {
+      // If there's a File for profile_image, send multipart/form-data
+      if (data.profile_image && typeof data.profile_image !== 'string') {
+        const formData = new FormData();
+
+        Object.entries(data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (key === 'profile_image') {
+              formData.append('profile_image', value as File);
+            } else {
+              formData.append(key, String(value));
+            }
+          }
+        });
+
+        // include the id in the payload if backend expects it
+        formData.append('id', id);
+        const resp = await apiClient.put('/customer/update', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        return resp.data;
+      }
+
+      // Fallback: plain JSON update
+      return customerApi.updateCustomer(id, data as Partial<Customer>);
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.id) });
@@ -254,3 +291,5 @@ export function useRenewCustomerSubscription() {
     },
   });
 }
+
+

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from "react";
 import {
   Users,
   CheckCircle,
@@ -10,7 +10,7 @@ import {
   Calendar,
   ArrowRight,
   Activity,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -25,9 +25,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts';
-import Layout from '../../components/Layout/Layout';
-import { useCustomers, useCustomerStatistics } from '../../hooks/useCustomer';
+} from "recharts";
+import Layout from "../../components/Layout/Layout";
+import { useCustomers, useCustomerStatistics, useMonthlyCustomerRegistrations } from "../../hooks/useCustomer";
+import type { ActivityPayload } from "../../api/officerApi";
+import { useActivityLogs } from "../../hooks/useOfficer";
 // Types
 interface StatCardProps {
   icon: React.ReactNode;
@@ -35,7 +37,7 @@ interface StatCardProps {
   label: string;
   trend: number;
   trendUp: boolean;
-  color: 'primary' | 'success' | 'warning' | 'danger';
+  color: "primary" | "success" | "warning" | "danger";
 }
 
 interface ActivityItem {
@@ -43,7 +45,7 @@ interface ActivityItem {
   icon: React.ReactNode;
   text: string;
   time: string;
-  type: 'success' | 'warning' | 'primary' | 'info';
+  type: "success" | "warning" | "primary" | "info";
 }
 
 interface AlertItem {
@@ -53,118 +55,170 @@ interface AlertItem {
   count: number;
   icon: React.ReactNode;
 }
-
-// Sample Data
-const registrationData = [
-  { month: 'Jun', registrations: 125, verifications: 118 },
-  { month: 'Jul', registrations: 174, verifications: 165 },
-  { month: 'Aug', registrations: 105, verifications: 98 },
-  { month: 'Sep', registrations: 218, verifications: 205 },
-  { month: 'Oct', registrations: 153, verifications: 148 },
-  { month: 'Nov', registrations: 251, verifications: 238 },
-  { month: 'Dec', registrations: 189, verifications: 176 },
-];
+type ActivityType = "primary" | "success" | "info" | "warning";
 
 
 const verificationData = [
-  { day: 'Mon', count: 45 },
-  { day: 'Tue', count: 52 },
-  { day: 'Wed', count: 38 },
-  { day: 'Thu', count: 67 },
-  { day: 'Fri', count: 58 },
-  { day: 'Sat', count: 23 },
-  { day: 'Sun', count: 15 },
+  { day: "Mon", count: 45 },
+  { day: "Tue", count: 52 },
+  { day: "Wed", count: 38 },
+  { day: "Thu", count: 67 },
+  { day: "Fri", count: 58 },
+  { day: "Sat", count: 23 },
+  { day: "Sun", count: 15 },
 ];
+
 
 const DashboardPage: React.FC = () => {
   //  const { data: customers, isLoading, isError, error } = useCustomers();
-    const { data: statistics, isLoading, isError, error } = useCustomerStatistics();
-    // put the value here dynamcally after fetching
+  const {
+    data: statistics,
+    isLoading,
+    isError,
+    error,
+  } = useCustomerStatistics();
+
+const {
+  data: registrationRaw,
+  isLoading: registrationLoading,
+  isError: registrationError,
+  error: registrationErrorObj,
+} = useMonthlyCustomerRegistrations();
+
+const registrationData = useMemo(() => {
+  if (!registrationRaw || !Array.isArray(registrationRaw)) return [];
+
+  return registrationRaw.map((it) => ({
+    month: it.month,
+    registrations: it.registrations, // Default to 0 as the API doesn't provide this field
+  }));
+}, [registrationRaw]);
+// console.log("Registration Data:", registrationData);
+
+  // put the value here dynamcally after fetching
   const statusData = [
-    { name: 'Active', value: statistics?.active_customers || 0, color: '#10B981' },
-    { name: 'Expired', value: statistics?.expired_customers || 0, color: '#F59E0B' },
+    {
+      name: "Active",
+      value: statistics?.active_customers || 0,
+      color: "#10B981",
+    },
+    {
+      name: "Expired",
+      value: statistics?.expired_customers || 0,
+      color: "#F59E0B",
+    },
   ];
   // i will put the value here dynamically after fetching
   const stats: StatCardProps[] = [
     {
       icon: <Users className="w-6 h-6" />,
       value: statistics?.total_customers || 0,
-      label: 'Total Registered Customers',
+      label: "Total Registered Customers",
       trend: 12,
       trendUp: true,
-      color: 'primary',
+      color: "primary",
     },
     {
       icon: <CheckCircle className="w-6 h-6" />,
       value: statistics?.active_customers || 0,
-      label: 'Active ID Cards',
+      label: "Active ID Cards",
       trend: 8,
       trendUp: true,
-      color: 'success',
+      color: "success",
     },
     {
       icon: <AlertTriangle className="w-6 h-6" />,
       value: statistics?.expired_customers || 0,
-      label: 'Expired ID Cards',
+      label: "Expired ID Cards",
       trend: 3,
       trendUp: false,
-      color: 'warning',
+      color: "warning",
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
       value: statistics?.registered_this_month || 0,
-      label: 'New This Month',
+      label: "New This Month",
       trend: 24,
       trendUp: true,
-      color: 'primary',
+      color: "primary",
     },
   ];
+  const {
+    data: activityData,
+    isLoading: activityLoading,
+    isError: activityDataError,
+    error:activityError,
+    isSuccess: activitySuccess,
+  } = useActivityLogs();
 
-  const recentActivity: ActivityItem[] = [
-    {
-      id: '1',
-      icon: <UserPlus className="w-5 h-5" />,
-      text: 'New customer registered',
-      time: '2 minutes ago',
-      type: 'primary',
-    },
-    {
-      id: '2',
-      icon: <CheckCircle className="w-5 h-5" />,
-      text: 'ID card verified at checkpoint',
-      time: '15 minutes ago',
-      type: 'success',
-    },
-    {
-      id: '3',
-      icon: <Activity className="w-5 h-5" />,
-      text: 'ID card renewed successfully',
-      time: '1 hour ago',
-      type: 'warning',
-    },
-    {
-      id: '4',
-      icon: <Shield className="w-5 h-5" />,
-      text: 'New officer added to system',
-      time: '3 hours ago',
-      type: 'info',
-    },
-  ];
+  const resolveActivityType = (action = ""): ActivityType => {
+    if (!action) return "info";
+    if (action.startsWith("Registered_customer")) {
+      return "primary";
+    } else if (action.startsWith("Registered_officer")) {
+      return "info";
+    } else if (action.startsWith("Renew_Customer")) {
+      return "success";
+    }
+    return "info";
+  };
+
+  const safeGetTime = (dateLike: unknown): number => {
+    try {
+      const d = new Date(String(dateLike || ""));
+      const t = d.getTime();
+      return Number.isFinite(t) ? t : 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const formatTimeString = (dateLike: unknown): string => {
+    if (!dateLike) return "";
+    const ts = safeGetTime(dateLike);
+    if (!ts) return String(dateLike);
+    try {
+      return new Date(ts).toLocaleString();
+    } catch {
+      return String(dateLike);
+    }
+  };
+  // Format and map the data (memoized)
+  const recentActivity = useMemo(() => {
+    const activity = activityData || [];
+    return (activity as ActivityPayload[])
+      .map((officer: ActivityPayload, idx: number) => {
+        const rawTime = safeGetTime(officer?.timestamp);
+        return {
+          id: officer?.id ?? `unknown-${idx}`,
+          icon: <UserPlus className="w-5 h-5" />,
+          text: officer?.action ?? "Activity",
+          time: formatTimeString(officer?.timestamp),
+          rawTime,
+          type: resolveActivityType(officer?.action ?? ""),
+        } as unknown as ActivityItem & { rawTime: number };
+      })
+      .sort((a, b) => (b.rawTime || 0) - (a.rawTime || 0))
+      .slice(0, 5);
+  }, [activityData]);
+
 
   const alerts: AlertItem[] = [
     {
-      id: '1',
-      title: 'IDs Expiring This Week',
-      description:
-        `${statistics?.expiring_this_week || 0} customer ID cards are scheduled to expire within the next 7 days.`,
+      id: "1",
+      title: "IDs Expiring This Week",
+      description: `${
+        statistics?.expiring_this_week || 0
+      } customer ID cards are scheduled to expire within the next 7 days.`,
       count: statistics?.expiring_this_week || 0,
       icon: <Clock className="w-5 h-5" />,
     },
     {
-      id: '2',
-      title: 'IDs Expiring This Month',
-      description:
-        `${statistics?.expiring_this_month || 0} customer ID cards will expire by the end of December.`,
+      id: "2",
+      title: "IDs Expiring This Month",
+      description: `${
+        statistics?.expiring_this_month || 0
+      } customer ID cards will expire by the end of December.`,
       count: statistics?.expiring_this_month || 0,
       icon: <Calendar className="w-5 h-5" />,
     },
@@ -172,11 +226,11 @@ const DashboardPage: React.FC = () => {
 
   const getColorClasses = (color: string) => {
     const colorMap = {
-      primary: 'bg-emerald-50 text-emerald-600',
-      success: 'bg-green-50 text-green-600',
-      warning: 'bg-amber-50 text-amber-600',
-      danger: 'bg-red-50 text-red-600',
-      info: 'bg-blue-50 text-blue-600',
+      primary: "bg-emerald-50 text-emerald-600",
+      success: "bg-green-50 text-green-600",
+      warning: "bg-amber-50 text-amber-600",
+      danger: "bg-red-50 text-red-600",
+      info: "bg-blue-50 text-blue-600",
     };
     return colorMap[color as keyof typeof colorMap];
   };
@@ -207,11 +261,11 @@ const DashboardPage: React.FC = () => {
               <div
                 className={`px-3 py-1 rounded-lg text-xs font-semibold ${
                   stat.trendUp
-                    ? 'bg-green-50 text-green-600'
-                    : 'bg-red-50 text-red-600'
+                    ? "bg-green-50 text-green-600"
+                    : "bg-red-50 text-red-600"
                 }`}
               >
-                {stat.trendUp ? '↑' : '↓'} {stat.trend}%
+                {stat.trendUp ? "↑" : "↓"} {stat.trend}%
               </div>
             </div>
 
@@ -225,67 +279,73 @@ const DashboardPage: React.FC = () => {
         ))}
       </div>
 
+      {isError && (
+        <div className="mb-6 p-3 rounded bg-red-50 border border-red-100 text-red-700">
+          Error loading dashboard statistics: {String(error?.message ?? error ?? "Unknown error")}
+        </div>
+      )}
+
       {/* Charts Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-        {/* Registration Trend */}
-        <div className="xl:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900">
-              Registration & Verification Trend
-            </h3>
-            <button className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:gap-3 transition-all">
-              View Details <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={registrationData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis
-                dataKey="month"
-                stroke="#64748b"
-                style={{ fontSize: '12px', fontWeight: 500 }}
-              />
-              <YAxis
-                stroke="#64748b"
-                style={{ fontSize: '12px', fontWeight: 500 }}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: '13px', fontWeight: 500 }} />
-              <Line
-                type="monotone"
-                dataKey="registrations"
-                stroke="#059669"
-                strokeWidth={3}
-                dot={{ fill: '#059669', r: 5 }}
-                activeDot={{ r: 7 }}
-                name="Registrations"
-              />
-              <Line
-                type="monotone"
-                dataKey="verifications"
-                stroke="#f59e0b"
-                strokeWidth={3}
-                dot={{ fill: '#f59e0b', r: 5 }}
-                activeDot={{ r: 7 }}
-                name="Verifications"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        {
+          registrationLoading ? (
+            <div className="xl:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-slate-900">Registration & Verification Trend</h3>
+                <button className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:gap-3 transition-all">
+                  View Details <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-center justify-center h-[280px] text-slate-500">Loading registration data...</div>
+            </div>
+          ) : registrationError ? (
+            <div className="xl:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-slate-900">Registration & Verification Trend</h3>
+                <button className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:gap-3 transition-all">
+                  View Details <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="p-3 rounded bg-red-50 border border-red-100 text-red-700">Error loading registration data: {String(registrationErrorObj?.message ?? registrationErrorObj ?? 'Unknown error')}</div>
+            </div>
+          ) : registrationData.length > 0 ? (
+            <div className="xl:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-slate-900">Registration & Verification Trend</h3>
+                <button className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:gap-3 transition-all">
+                  View Details <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <LineChart data={registrationData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="month" stroke="#64748b" style={{ fontSize: "12px", fontWeight: 500 }} />
+                  <YAxis stroke="#64748b" style={{ fontSize: "12px", fontWeight: 500 }} />
+                  <Tooltip contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
+                  <Legend wrapperStyle={{ fontSize: "13px", fontWeight: 500 }} />
+                  <Line type="monotone" dataKey="registrations" stroke="#059669" strokeWidth={3} dot={{ fill: "#059669", r: 5 }} activeDot={{ r: 7 }} name="Registrations" />
+                  <Line type="monotone" dataKey="verifications" stroke="#f59e0b" strokeWidth={3} dot={{ fill: "#f59e0b", r: 5 }} activeDot={{ r: 7 }} name="Verifications" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="xl:col-span-2 bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-slate-900">Registration & Verification Trend</h3>
+                <button className="flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:gap-3 transition-all">
+                  View Details <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex items-center justify-center h-[280px] text-slate-500">Couldn't load registration data.</div>
+            </div>
+          )
+        }
+        
 
         {/* ID Status Pie Chart */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-slate-900">
-              ID Card Status
-            </h3>
+            <h3 className="text-lg font-bold text-slate-900">ID Card Status</h3>
           </div>
           <ResponsiveContainer width="100%" height={280}>
             <PieChart>
@@ -295,7 +355,7 @@ const DashboardPage: React.FC = () => {
                 cy="50%"
                 labelLine={false}
                 label={({ name, percent }) =>
-                  `${name || ''} ${((percent || 0) * 100).toFixed(0)}%`
+                  `${name || ""} ${((percent || 0) * 100).toFixed(0)}%`
                 }
                 outerRadius={90}
                 fill="#8884d8"
@@ -307,10 +367,10 @@ const DashboardPage: React.FC = () => {
               </Pie>
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  backgroundColor: "#fff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
               />
             </PieChart>
@@ -351,20 +411,20 @@ const DashboardPage: React.FC = () => {
               <XAxis
                 dataKey="day"
                 stroke="#64748b"
-                style={{ fontSize: '12px', fontWeight: 500 }}
+                style={{ fontSize: "12px", fontWeight: 500 }}
               />
               <YAxis
                 stroke="#64748b"
-                style={{ fontSize: '12px', fontWeight: 500 }}
+                style={{ fontSize: "12px", fontWeight: 500 }}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '12px',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                  backgroundColor: "#fff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "12px",
+                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
                 }}
-                cursor={{ fill: 'rgba(5, 150, 105, 0.1)' }}
+                cursor={{ fill: "rgba(5, 150, 105, 0.1)" }}
               />
               <Bar
                 dataKey="count"
@@ -387,28 +447,39 @@ const DashboardPage: React.FC = () => {
             </button>
           </div>
           <div className="space-y-4">
-            {recentActivity.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-emerald-600 hover:text-white transition-all duration-300 group cursor-pointer"
-              >
-                <div
-                  className={`p-2 rounded-lg ${getColorClasses(
-                    activity.type
-                  )} group-hover:bg-white/20 group-hover:text-white transition-colors`}
-                >
-                  {activity.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 group-hover:text-white transition-colors">
-                    {activity.text}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5 group-hover:text-white transition-colors">
-                    {activity.time}
-                  </p>
-                </div>
+            {activityLoading ? (
+              <div className="text-sm text-slate-500">Loading activities...</div>
+            ) : activityDataError || activityError ? (
+              <div className="text-sm text-red-600">
+                <p>Could not load activities.</p>
+                <p className="mt-1">{String(activityError?.message ?? 'No access or server error')}</p>
               </div>
-            ))}
+            ) : recentActivity && recentActivity.length > 0 ? (
+              recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 hover:bg-emerald-600 hover:text-white transition-all duration-300 group cursor-pointer"
+                >
+                  <div
+                    className={`p-2 rounded-lg ${getColorClasses(
+                      activity.type
+                    )} group-hover:bg-white/20 group-hover:text-white transition-colors`}
+                  >
+                    {activity.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900 group-hover:text-white transition-colors">
+                      {activity.text}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 group-hover:text-white transition-colors">
+                      {activity.time}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-slate-500">No recent activity</div>
+            )}
           </div>
         </div>
 
@@ -453,4 +524,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;   
+export default DashboardPage;
