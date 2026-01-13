@@ -86,7 +86,7 @@ export const customerApi = {
 
   // Update customer
   updateCustomer: async (id: string, data: Partial<Customer>): Promise<ApiResponse<Customer>> => {
-    const response = await apiClient.put(`/customer/${id}`, data);
+    const response = await apiClient.put(`/customer/update`, {id, ...data});
     return response.data;
   },
 

@@ -37,9 +37,14 @@ export function useOfficer() {
 
 // Hook: Login mutation
 export function useLogin() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: LoginData) => officerApi.login(data),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: officerKeys.detail() });
+      queryClient.invalidateQueries({ queryKey: officerKeys.logs() });
+
       localStorage.setItem('token', data.data.token);
       toast.success(data.message || 'Login successful!');
     },
@@ -48,7 +53,16 @@ export function useLogin() {
     },
   });
 }
+export function useLogout() {
+  // const queryClient = useQueryClient();
 
+  return useMutation({
+    mutationFn:()=>officerApi.logout(),
+    onSuccess:()=> {        
+        toast.success("Logging out")
+    },
+  })
+}
 // Hook: Create officer mutation
 export function useCreateOfficer() {
   const queryClient = useQueryClient();
@@ -107,7 +121,7 @@ export function useActivityLogs() {
     queryKey: officerKeys.logs(),
     queryFn: async () => {
       const response = await officerApi.activtyLog();
-      console.log("inside hook",response )
+      // console.log("inside hook",response )
       return response.data
 
     },

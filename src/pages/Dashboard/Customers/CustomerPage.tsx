@@ -15,6 +15,7 @@ const CustomersPage: React.FC = () => {
   const [itemsPerPage] = useState(10);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
+  const [currentCustomer, setCurrentCustomer ] = useState("")
 
   // Fetch data using TanStack Query
   const { data: statistics, isLoading: statsLoading, isError: statsError } = useCustomerStatistics();
@@ -337,7 +338,10 @@ const CustomersPage: React.FC = () => {
                         <button 
                           className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600 hover:text-blue-600"
                           title="Edit customer"
-
+                          onClick={()=>{
+                            setCurrentCustomer(customer.id)
+                            setEditModal(true)
+                          }}
                         >
                           <Edit className="w-4 h-4" />
                         </button>
@@ -440,9 +444,9 @@ const CustomersPage: React.FC = () => {
         {showAddModal && (
           <AddCustomerModal onClose={()=>setShowAddModal(false)}/>
         )}
-        {/* {editModal && (
-          // <EditCustomerModal onClose={()=>setEditModal(false)} customer_id={} />
-        )} */}
+        {editModal && (
+          <EditCustomerModal onClose={()=>setEditModal(false)} customer_id={currentCustomer} />
+        )}
       </div>
     </Layout>
   );
