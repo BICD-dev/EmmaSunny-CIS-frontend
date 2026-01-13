@@ -53,6 +53,11 @@ export interface CreateCustomerData {
   profile_image?: File;
 }
 
+interface MonthlyRegistrations {
+  month:string,
+  registrations:number
+}
+
 // API Functions
 export const customerApi = {
   // Get all customers
@@ -101,5 +106,9 @@ export const customerApi = {
   downloadCustomerCsv:async ()=>{
     const response = await apiClient.get("/customer/download/csv");
     return response.data;
+  },
+  getMonthlyCustomersRegistration:async ()=>{
+    const response:MonthlyRegistrations[] = await apiClient.get("/customer/analytics/customer-registrations");
+    return response;
   }
 };
