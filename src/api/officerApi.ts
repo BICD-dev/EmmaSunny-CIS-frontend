@@ -62,7 +62,10 @@ export const officerApi = {
     const response = await apiClient.post("/auth/login", data);
     return response.data;
   },
-
+  logout:async ()=>{
+      console.log("entered logout")
+      localStorage.removeItem("token");
+  },
   // Get all officers
   getAllOfficers: async (): Promise<ApiResponse<Officer[]>> => {
     const response = await apiClient.get("/officer");

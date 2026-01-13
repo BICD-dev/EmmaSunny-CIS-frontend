@@ -1,6 +1,7 @@
 import React from 'react';
 import { Activity, Users, CheckCircle, Shield, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLogout } from '../../hooks/useOfficer';
 
 interface SidebarProps {
   activePage?: string;
@@ -38,9 +39,10 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage = 'dashboard' }) => {
       href:"/activity"
     }
   ];
+const logoutMutation = useLogout();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    logoutMutation.mutateAsync();
     window.location.href = '#/login';
   };
 

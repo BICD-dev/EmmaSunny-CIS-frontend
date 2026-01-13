@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import { Navigate, useLocation } from 'react-router-dom';
 
 interface PrivateRouteProps {
@@ -9,6 +10,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const token = localStorage.getItem('token');
 
   if (!token) {
+    toast.error("Session Expired, redirectin to login page")
     // Redirect to login page but save the location they were trying to access
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
