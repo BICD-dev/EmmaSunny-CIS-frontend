@@ -54,6 +54,20 @@ const OfficersPage: React.FC = () => {
       officer.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const totalResults = filteredOfficers.length;
+  const totalPages = Math.max(1, Math.ceil(totalResults / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalResults);
+  const paginatedOfficers = filteredOfficers.slice(startIndex, endIndex);
+
+  // Reset to first page when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   const getRoleBadge = (role: string) => {
     return role === "Admin"
       ? "bg-emerald-100 text-emerald-700"
@@ -247,7 +261,7 @@ const OfficersPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {filteredOfficers.map((officer) => (
+              {paginatedOfficers.map((officer) => (
                 <tr
                   key={officer.id}
                   className="hover:bg-slate-50 transition-colors"
@@ -323,23 +337,32 @@ const OfficersPage: React.FC = () => {
         {/* Pagination */}
         <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
           <div className="text-sm text-slate-600">
-            Showing <span className="font-semibold">1</span> to{" "}
-            <span className="font-semibold">4</span> of{" "}
-            <span className="font-semibold">4</span> results
+            Showing <span className="font-semibold">{totalResults === 0 ? 0 : startIndex + 1}</span> to <span className="font-semibold">{endIndex}</span> of <span className="font-semibold">{totalResults}</span> results
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled
+              disabled={currentPage <= 1}
             >
               Previous
             </button>
-            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium">
-              1
-            </button>
+
+            {/* Page numbers (show up to 7 buttons) */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).slice(0, 50).map((p) => (
+              <button
+                key={p}
+                onClick={() => setCurrentPage(p)}
+                className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${p === currentPage ? 'bg-emerald-600 text-white' : 'border border-slate-200 hover:bg-slate-50'}`}
+              >
+                {p}
+              </button>
+            ))}
+
             <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               className="px-4 py-2 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled
+              disabled={currentPage >= totalPages}
             >
               Next
             </button>
